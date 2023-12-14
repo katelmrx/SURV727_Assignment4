@@ -24,13 +24,13 @@ You will need to set up a Google account with a project to be able to use this s
 
 Go to <https://console.cloud.google.com> and make sure you are logged in a non-university Google account. **This may not work on a university G Suite account because of restrictions on those accounts.** Create a new project by navigating to the dropdown menu at the top (it might say "Select a project") and selecting "New Project" in the window that pops up. Name it something useful.
 
-####After you have initialized a project, paste your project ID into the following chunk.
+#### After you have initialized a project, paste your project ID into the following chunk.
 
 ```{r}
 project <- "surv727-fcdd"
 ```
 
-####We will connect to a public database, the Chicago crime database, which has data on crime in Chicago.
+#### We will connect to a public database, the Chicago crime database, which has data on crime in Chicago.
 
 ```{r}
 con <- dbConnect(
@@ -63,7 +63,7 @@ WHERE year = 2016
 LIMIT 10;
 ```
 
-According to our first query, there are 269,854 rows in the crime table for the year 2016. 
+According to our first query, there are 269,854 rows in the crime table for the year 2016.
 
 #### Next, count the number of arrests grouped by `primary_type` in 2016. Note that is a somewhat similar task as above, with some adjustments on which rows should be considered. Sort the results, i.e. list the number of arrests in a descending order.
 
@@ -75,6 +75,7 @@ GROUP BY primary_type
 ORDER BY COUNT(*) DESC
 LIMIT 10;
 ```
+
 Arrests for narcotics, battery, and theft were the most common in 2016.
 
 ####We can also use the `date` for grouping. Count the number of arrests grouped by hour of the day in 2016. You can extract the latter information from `date` via `EXTRACT(HOUR FROM date)`. Which time of the day is associated with the most arrests?
@@ -88,9 +89,9 @@ ORDER BY COUNT(*) DESC
 LIMIT 12;
 ```
 
-Later hours of the data are associated with more arrests. Hour 10 is associated with the most arrests. 
+Later hours of the data are associated with more arrests. Hour 10 is associated with the most arrests.
 
-####Focus only on `HOMICIDE` and count the number of arrests for this incident type, grouped by year. List the results in descending order.
+#### Focus only on `HOMICIDE` and count the number of arrests for this incident type, grouped by year. List the results in descending order.
 
 ```{sql connection = con}
 SELECT YEAR, COUNT(*) as COUNT
@@ -100,6 +101,7 @@ GROUP BY year
 ORDER BY COUNT(*) DESC
 LIMIT 20;
 ```
+
 Years 2001-2003 had the highest number of arrests for homicides.
 
 #### Find out which districts have the highest numbers of arrests in 2015 and 2016. That is, count the number of arrests in 2015 and 2016, grouped by year and district. List the results in descending order.
@@ -112,10 +114,10 @@ GROUP BY YEAR, DISTRICT
 ORDER BY COUNT(*) DESC
 LIMIT 20;
 ```
+
 Districts 11 and 7, respectively, had the highest and second-highest numbers of arrests in both 2015 and 2016.
 
 #### Let's switch to writing queries from within R via the `DBI` package. Create a query object that counts the number of arrests grouped by `primary_type` of district 11 in year 2016. The results should be displayed in descending order.
-
 
 ```{r}
 dbiquery1 <- "SELECT primary_type, COUNT(*) as COUNT
@@ -128,14 +130,15 @@ dbiquery1 <- "SELECT primary_type, COUNT(*) as COUNT
 
 The above code assigns `dbiquery1` as a query object that counts the number of arrests in descending order grouped by `primary_type` within District 11 in the year 2016.
 
-####Execute the query.
+#### Execute the query.
 
 ```{r}
 dbGetQuery(con, dbiquery1)
 ```
+
 The above code uses the function dbGetQuery() to execute query `dbiquery1`. 2016 arrests in District 11 were mostly for narcotics, battery, and prostitution.
 
-####Try to write the very same query, now using the `dbplyr` package. For this, you need to first map the `crime` table to a tibble object in R.
+#### Try to write the very same query, now using the `dbplyr` package. For this, you need to first map the `crime` table to a tibble object in R.
 
 ```{r}
 crimetibble <- tbl(con, 'crime')
@@ -143,7 +146,7 @@ crimetibble <- tbl(con, 'crime')
 
 The above code maps the `crime` table to a tibble object in R, titled `crimetibble`.
 
-####Again, count the number of arrests grouped by `primary_type` of district 11 in year 2016, now using `dplyr` syntax.
+#### Again, count the number of arrests grouped by `primary_type` of district 11 in year 2016, now using `dplyr` syntax.
 
 ```{r}
 crimetibble %>% 
@@ -152,9 +155,10 @@ crimetibble %>%
   summarize(count = n()) %>% 
   arrange(desc(count))
 ```
+
 The above code counts the number of arrests in descending order grouped by `primary_type` within District 11 in the year 2016, using `dplyr` syntax. Again, we see the same numbers as we did in DBI query `dbiquery1`.
 
-####Count the number of arrests grouped by `primary_type` and `year`, still only for district 11. Arrange the result by `year`.
+#### Count the number of arrests grouped by `primary_type` and `year`, still only for district 11. Arrange the result by `year`.
 
 ```{r}
 crimetibble %>% 
@@ -163,9 +167,10 @@ crimetibble %>%
   summarize(count = n()) %>% 
   arrange(desc(year))
 ```
+
 This code counts the number of arrests grouped by `primary_type` and `year`, still only for district 11. With the results arranged by `year`, however, the count of arrests is no longer in descending order.
 
-####Assign the results of the query above to a local R object.
+#### Assign the results of the query above to a local R object.
 
 ```{r}
 arrestsbytypeandyear_chidistrict11 <- crimetibble %>% 
@@ -177,14 +182,15 @@ arrestsbytypeandyear_chidistrict11 <- crimetibble %>%
 
 The above code assigns the results of our prior SQL query using `dplyr` syntax to a local R object titled, arrestsbytypeandyear_chidistrict11.
 
-####Confirm that you pulled the data to the local environment by displaying the first ten rows of the saved data set.
+#### Confirm that you pulled the data to the local environment by displaying the first ten rows of the saved data set.
 
 ```{r}
 head(arrestsbytypeandyear_chidistrict11, 10)
 ```
+
 The above code confirms I pulled the data into my local environment by printing the first ten rows of my new R object, arrestsbytypeandyear_chidistrict11.
 
-####Close the connection.
+#### Close the connection.
 
 ```{r}
 #code to close database connection
